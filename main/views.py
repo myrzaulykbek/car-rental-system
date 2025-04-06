@@ -1,21 +1,47 @@
 from django.http import HttpResponse
 from rest_framework import viewsets
+from django.contrib.auth.models import User
+from rest_framework import status
+from rest_framework.decorators import action, api_view
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Car, Rental
 from .serializers import CarSerializer, RentalSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CarFilter, RentalFilter
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
 
 def home(request):
     return HttpResponse("Добро пожаловать в систему аренды автомобилей!")
+
+# Представление для регистрации
+@api_view(['POST'])
+def register(request):
+    if request.method == 'POST':
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not username or not email or not password:
+            return Response({"error": "Все поля обязательны"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Создаем пользователя
+        user = User.objects.create_user(username=username, email=email, password=password)
+
+        # Создаем токен для нового пользователя
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_201_CREATED)
+
 
 class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CarFilter
+
 class RentalViewSet(viewsets.ModelViewSet):
     queryset = Rental.objects.select_related('user', 'car')
     serializer_class = RentalSerializer
