@@ -19,18 +19,26 @@ class User(AbstractUser):  # Наследуемся от AbstractUser
 
 # Модель аренды
 class Rental(models.Model):
+    PENDING = 'pending'
+    ACTIVE = 'active'
+    COMPLETED = 'completed'
+    CANCELED = 'canceled'
+
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (ACTIVE, 'Active'),
+        (COMPLETED, 'Completed'),
+        (CANCELED, 'Canceled'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
-    status = models.CharField(max_length=20, choices=[
-        ('pending', 'Pending'),
-        ('active', 'Active'),
-        ('completed', 'Completed'),
-        ('canceled', 'Canceled'),
-    ], default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)
 
-    def __str__(self):
+
+def __str__(self):
         return f"Rental: {self.user.username} -> {self.car} ({self.start_date} - {self.end_date})"
 
 #
