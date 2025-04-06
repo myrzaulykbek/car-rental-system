@@ -16,8 +16,6 @@ class CarViewSet(viewsets.ModelViewSet):
     serializer_class = CarSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CarFilter
-
-
 class RentalViewSet(viewsets.ModelViewSet):
     queryset = Rental.objects.select_related('user', 'car')
     serializer_class = RentalSerializer
