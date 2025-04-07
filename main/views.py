@@ -10,6 +10,10 @@ from .serializers import CarSerializer, RentalSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CarFilter, RentalFilter
 
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UserSerializer
+
 def home(request):
     return HttpResponse("Добро пожаловать в систему аренды автомобилей!")
 
@@ -54,3 +58,20 @@ class RentalViewSet(viewsets.ModelViewSet):
         rental.status = 'canceled'
         rental.save()
         return Response({'status': 'Rental canceled'}, status=status.HTTP_200_OK)
+
+
+
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
