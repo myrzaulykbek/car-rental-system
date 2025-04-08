@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% if user.is_authenticated %}
+    <h1>Добро пожаловать, {{ user.username }}!</h1>
+    {% if user.role == 'admin' %}
+        <a href="{% url 'admin_dashboard' %}">Перейти в админ панель</a>
+    {% elif user.role == 'client' %}
+        <a href="{% url 'client_dashboard' %}">Перейти в клиентскую панель</a>
+    {% endif %}
+{% else %}
+    <p>Пожалуйста, войдите в систему, чтобы продолжить.</p>
+{% endif %}
+</body>
+</html>

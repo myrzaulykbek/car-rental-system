@@ -16,6 +16,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', 'admin')
         return self.create_user(username, email, password, **extra_fields)
 
 
@@ -29,10 +30,14 @@ class Car(models.Model):
     def __str__(self):
         return f"{self.brand} {self.model} ({self.year})"
 # Модель пользователя
-class User(AbstractUser):  # Наследуемся от AbstractUser
+class User(AbstractUser):# Наследуемся от AbstractUser
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('client', 'Client'),
+    )
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     is_verified = models.BooleanField(default=False)
-    pass
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='client')
     objects = UserManager()
 # Модель аренды
 class Rental(models.Model):

@@ -14,6 +14,17 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
 
+from django.shortcuts import render
+from .decorators import admin_required, client_required
+
+@admin_required
+def admin_dashboard(request):
+    return render(request, 'main/admin_dashboard.html')
+
+
+@client_required
+def client_dashboard(request):
+    return render(request, 'main/client_dashboard.html')
 def home(request):
     return HttpResponse("Добро пожаловать в систему аренды автомобилей!")
 
