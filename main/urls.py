@@ -4,6 +4,7 @@ from .views import CarViewSet, RentalViewSet, home, register, UserProfileView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from . import views
+from django.contrib.auth import views as auth_views
 
 
 router = DefaultRouter()
@@ -25,4 +26,20 @@ urlpatterns = [
     path('api/profile/', UserProfileView.as_view(), name='user-profile'),
 ]
 
+urlpatterns += [
+    path('password-reset/',
+         auth_views.PasswordResetView.as_view(template_name='main/password_reset.html'),
+         name='password_reset'),
 
+    path('password-reset/done/',
+         auth_views.PasswordResetDoneView.as_view(template_name='main/password_reset_done.html'),
+         name='password_reset_done'),
+
+    path('reset/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(template_name='main/password_reset_confirm.html'),
+         name='password_reset_confirm'),
+
+    path('reset/done/',
+         auth_views.PasswordResetCompleteView.as_view(template_name='main/password_reset_complete.html'),
+         name='password_reset_complete'),
+]
