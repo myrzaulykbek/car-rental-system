@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Аренда машины</title>
+</head>
+<body>
+    <h1>Детали автомобиля</h1>
+    <p>Марка: {{ car.brand }}</p>
+    <p>Модель: {{ car.model }}</p>
+    <p>Год: {{ car.year }}</p>
+    <p>Цена за день: {{ car.price_per_day }}₸</p>
+    <a href="{% url 'rent_car' car.id %}">Арендовать эту машину</a>
+</body>
+</html>

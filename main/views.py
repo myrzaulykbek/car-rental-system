@@ -17,6 +17,18 @@ from .serializers import UserSerializer
 from django.shortcuts import render
 from .decorators import admin_required, client_required
 
+from django.contrib.auth.decorators import login_required
+
+
+def car_list(request):
+    cars = Car.objects.all()
+    return render(request, 'main/car_list.html', {'cars': cars})
+
+@login_required
+def rent_car(request, car_id):
+    car = Car.objects.get(id=car_id)
+    return render(request, 'rent_car.html', {'car': car})
+
 @admin_required
 def admin_dashboard(request):
     return render(request, 'main/admin_dashboard.html')

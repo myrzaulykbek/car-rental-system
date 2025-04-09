@@ -158,3 +158,4 @@ AUTH_USER_MODEL = 'main.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+LOGIN_URL = '/login/'

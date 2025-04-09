@@ -12,6 +12,7 @@ router.register(r'cars', CarViewSet)
 router.register(r'rentals', RentalViewSet)
 
 urlpatterns = [
+    path('cars/', views.car_list, name='car_list'),
     path('', home, name='home'),
     path('register/', register, name='register'),
     path('api/', include(router.urls)),
