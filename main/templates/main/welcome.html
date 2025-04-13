@@ -1,0 +1,66 @@
+<!-- welcome.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добро пожаловать в Car Rental!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        h2 {
+            color: #4CAF50;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: white;
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        .links a:hover {
+            background-color: #45a049;
+        }
+
+        .intro {
+            font-size: 20px;
+            margin-bottom: 40px;
+        }
+
+        .bg-image {
+            background-image: url('https://example.com/car-rental.jpg'); /* Поставь свой URL для фона */
+            background-size: cover;
+            background-position: center;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-image"></div>
+    <div class="container">
+        <h2>Добро пожаловать в Car Rental!</h2>
+        <p class="intro">Найдите идеальный автомобиль для аренды прямо сейчас. Мы предлагаем широкий выбор машин для любого случая!</p>
+
+        <div class="links">
+            <a href="{% url 'login' %}">Войти</a>
+            <a href="{% url 'register' %}">Зарегистрироваться</a>
+        </div>
+    </div>
+</body>
+</html>

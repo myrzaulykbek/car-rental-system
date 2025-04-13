@@ -1,28 +1,29 @@
-# tests.py
+from django.contrib.auth.models import User
 from django.test import TestCase
-from rest_framework.test import APIClient
-from rest_framework import status
 from django.urls import reverse
 
-
-class UserRegistrationTestCase(TestCase):
+class AuthenticationTests(TestCase):
     def setUp(self):
-        self.client = APIClient()  # Создаем экземпляр APIClient для отправки запросов
-        self.url = reverse('register')  # Это URL для регистрации, который вы используете в приложении
+        # Создаем пользователя для тестов
+        self.user = User.objects.create_user(username='testuser', password='12345', email='test@example.com')
 
-    def test_user_registration(self):
-        # Данные для отправки на сервер (можно менять в зависимости от того, как настроен API)
-        data = {
-            "username": "testuser",
-            "email": "testuser@example.com",
-            "password": "mypassword"
-        }
+    def test_login_valid_user(self):
+        # Тестирование логина с правильными данными
+        response = self.client.post(reverse('login'), {'username': 'testuser', 'password': '12345'})
+        self.assertEqual(response.status_code, 200)
 
-        # Отправляем POST-запрос на сервер
-        response = self.client.post(self.url, data, format='json')
+    def test_login_invalid_user(self):
+        # Тестирование логина с неправильным паролем
+        response = self.client.post(reverse('login'), {'username': 'testuser', 'password': 'wrongpassword'})
+        self.assertEqual(response.status_code, 200)
 
-        # Проверяем, что статус код ответа - 201 (это значит, что пользователь был успешно создан)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    def test_access_restricted_page_with_login(self):
+        # Тестирование доступа к защищенной странице с логином
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('car_list'))
+        self.assertEqual(response.status_code, 200)
 
-        # Также можно добавить проверку, чтобы убедиться, что данные возвращаются корректно
-        self.assertEqual(response.data['username'], 'testuser')
+    def test_access_restricted_page_without_login(self):
+        # Тестирование доступа к защищенной странице без логина
+        response = self.client.get(reverse('car_list'))
+        self.assertEqual(response.status_code, 302)  # Ожидаем редирект на страницу входа

@@ -10,3 +10,8 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Car)
 admin.site.register(Rental)
 admin.site.register(Payment)
+
+
+
+
+

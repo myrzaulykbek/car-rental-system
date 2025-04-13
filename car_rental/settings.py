@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+
 from pathlib import Path
 from datetime import timedelta
 
@@ -60,7 +61,7 @@ ROOT_URLCONF = 'car_rental.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # добавлено
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -158,4 +159,12 @@ AUTH_USER_MODEL = 'main.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-LOGIN_URL = '/login/'
+
+
+LOGIN_URL = '/your-login-url/'
+
+
+
+import os
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

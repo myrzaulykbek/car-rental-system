@@ -1,18 +1,53 @@
-from django.urls import path, include
+from django.urls import  include
 from rest_framework.routers import DefaultRouter
-from .views import CarViewSet, RentalViewSet, home, register, UserProfileView
+from .views import  RentalViewSet,  register, UserProfileView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from django.contrib import admin
+
 from . import views
 from django.contrib.auth import views as auth_views
+from django.urls import path
+from .views import home_view
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+from .views import CarViewSet, PaymentViewSet, home
+
+
+
+router = DefaultRouter()
+router.register(r'cars', CarViewSet)
+router.register(r'payments', PaymentViewSet)  # добавили платежи
+
+
+
+
+router = DefaultRouter()
+router.register(r'cars', CarViewSet)
+router.register(r'payments', PaymentViewSet)  # добавили платежи
+
+
+
+
 
 
 router = DefaultRouter()
 router.register(r'cars', CarViewSet)
 router.register(r'rentals', RentalViewSet)
 
+
+
 urlpatterns = [
+    path('book/<int:car_id>/', views.book_car, name='book_car'),
+    path('', views.home_view, name='home'),  # Главная страница
+    path('car_list/', views.car_list, name='car_list'),  # Список машин
+    path('register/', views.register, name='register'),
+    path('', home_view, name='home'),
     path('cars/', views.car_list, name='car_list'),
+    path('add_car/', views.add_car, name='add_car'),
+    path('login/', views.login_view, name='login'),
+
+
     path('', home, name='home'),
     path('register/', register, name='register'),
     path('api/', include(router.urls)),
@@ -26,6 +61,11 @@ urlpatterns = [
 
     path('api/profile/', UserProfileView.as_view(), name='user-profile'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
 
 urlpatterns += [
     path('password-reset/',

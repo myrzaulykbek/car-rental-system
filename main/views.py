@@ -1,25 +1,90 @@
-from django.http import HttpResponse
+
 from rest_framework import viewsets
 from django.contrib.auth.models import User
-from rest_framework import status
 from rest_framework.decorators import action, api_view
-from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Car, Rental
+from .models import  Rental
 from .serializers import CarSerializer, RentalSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CarFilter, RentalFilter
-
+from django.shortcuts import  redirect
+from .decorators import admin_required, client_required
+from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 from .serializers import UserSerializer
+from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
+from .forms import CarForm
+
+
+from .models import Payment
+from .serializers import PaymentSerializer
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+
+
+def book_car(request, car_id):
+    car = Car.objects.get(id=car_id)
+    if car.is_available:
+        car.is_available = False
+        car.save()
+    return redirect('car_list')
+
+def home_view(request):
+    if request.user.is_authenticated:
+        return redirect('car_list')  # редирект на car_list, если пользователь уже авторизован
+
+    return render(request, 'main/welcome.html')
+
+
+
+def add_car(request):
+    if request.method == 'POST':
+        form = CarForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('car_list')  # После добавления перенаправить на список машин
+    else:
+        form = CarForm()
+
+    return render(request, 'add_car.html', {'form': form})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('home')  # Перенаправление после входа
+        else:
+            return render(request, 'main/login.html', {'error': 'Неверный логин или пароль'})
+
+    return render(request, 'main/login.html')
+
+
+def add_car(request):
+    return HttpResponse("Здесь будет форма добавления машины.")
+
 
 from django.shortcuts import render
-from .decorators import admin_required, client_required
+from .models import Car
 
-from django.contrib.auth.decorators import login_required
+def home_view(request):
+    cars = Car.objects.all()  # Получаем все автомобили
+    return render(request, 'main/home.html', {'cars': cars})
 
 
+
+
+@login_required
 def car_list(request):
     cars = Car.objects.all()
     return render(request, 'main/car_list.html', {'cars': cars})

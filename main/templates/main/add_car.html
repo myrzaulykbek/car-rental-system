@@ -6,18 +6,13 @@
 </head>
 <body>
     <h1>Добавить новую машину</h1>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <label for="brand">Марка:</label>
-        <input type="text" id="brand" name="brand" required>
-        <label for="model">Модель:</label>
-        <input type="text" id="model" name="model" required>
-        <label for="year">Год:</label>
-        <input type="number" id="year" name="year" required>
-        <label for="price_per_day">Цена за день:</label>
-        <input type="number" id="price_per_day" name="price_per_day" required>
+        {{ form.as_p }}  <!-- Выводим форму с помощью Django -->
+
         <button type="submit">Добавить машину</button>
     </form>
+
     <a href="{% url 'car_list' %}">Назад к списку машин</a>
 </body>
 </html>

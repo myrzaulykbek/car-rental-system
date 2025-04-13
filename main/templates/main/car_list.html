@@ -8,7 +8,19 @@
     <h1>Список доступных машин</h1>
     <ul>
         {% for car in cars %}
-            <li>{{ car.brand }} {{ car.model }} ({{ car.year }}) - {{ car.price_per_day }}₸</li>
+            <li>
+                <div class="car-card">
+                    <h3>{{ car.brand }} {{ car.model }} ({{ car.year }})</h3>
+                    <p>Цена за день: {{ car.price_per_day }}₸</p>
+                    <p>Доступность: {{ car.is_available|yesno:"Да,Нет" }}</p>
+
+                    {% if car.image %}
+                        <img src="{{ car.image.url }}" alt="{{ car.brand }}" width="300" height="200">
+                    {% else %}
+                        <p>Фото недоступно</p>
+                    {% endif %}
+                </div>
+            </li>
         {% empty %}
             <li>Машины не найдены</li>
         {% endfor %}
