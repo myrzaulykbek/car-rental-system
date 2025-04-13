@@ -147,6 +147,20 @@ class RentalViewSet(viewsets.ModelViewSet):
         rental.save()
         return Response({'status': 'Rental canceled'}, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'])
+    def activate(self, request, pk=None):
+        rental = self.get_object()
+        rental.status = 'active'
+        rental.save()
+        return Response({'status': 'Rental activated'}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])
+    def complete(self, request, pk=None):
+        rental = self.get_object()
+        rental.status = 'completed'
+        rental.save()
+        return Response({'status': 'Rental completed'}, status=status.HTTP_200_OK)
+
 
 
 
