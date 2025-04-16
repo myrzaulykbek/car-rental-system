@@ -45,7 +45,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('cars/', views.car_list, name='car_list'),
     path('add_car/', views.add_car, name='add_car'),
-    path('login/', views.login_view, name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='main/login.html'), name='login'),
 
 
     path('', home, name='home'),
