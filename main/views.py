@@ -77,9 +77,11 @@ def add_car(request):
 from django.shortcuts import render
 from .models import Car
 
-def home_view(request):
-    cars = Car.objects.all()  # Получаем все автомобили
-    return render(request, 'main/home.html', {'cars': cars})
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'main/home.html')
+
 
 
 
@@ -177,3 +179,18 @@ class UserProfileView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+from django.contrib.auth import login
+from .forms import CustomUserCreationForm
+
+def register_view(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # автоматический вход
+            return redirect('home')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'main/register.html', {'form': form})

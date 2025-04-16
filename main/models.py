@@ -1,5 +1,3 @@
-
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
@@ -31,8 +29,8 @@ class Car(models.Model):
     def __str__(self):
         return f"{self.brand} {self.model} ({self.year})"
 
-# Модель пользователя
-class User(AbstractUser):# Наследуемся от AbstractUser
+
+class User(AbstractUser):
     ROLE_CHOICES = (
         ('admin', 'Admin'),
         ('client', 'Client'),
@@ -41,7 +39,11 @@ class User(AbstractUser):# Наследуемся от AbstractUser
     is_verified = models.BooleanField(default=False)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='client')
     objects = UserManager()
-# Модель аренды
+
+    def __str__(self):
+        return self.username
+
+
 class Rental(models.Model):
     PENDING = 'pending'
     ACTIVE = 'active'
@@ -61,12 +63,10 @@ class Rental(models.Model):
     end_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)
 
-
-def __str__(self):
+    def __str__(self):
         return f"Rental: {self.user.username} -> {self.car} ({self.start_date} - {self.end_date})"
 
-#
-# Модель платежа
+
 class Payment(models.Model):
     rental = models.OneToOneField(Rental, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -80,20 +80,21 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment: {self.rental} - {self.amount} ({self.status})"
 
-    class Payment(models.Model):
-        PAYMENT_METHODS = [
-            ('kaspi', 'Kaspi'),
-            ('halyk', 'Halyk Bank'),
-            ('cash', 'Cash'),
-            ('stripe', 'Stripe'),
-        ]
 
-        car = models.ForeignKey(Car, on_delete=models.CASCADE)
-        full_name = models.CharField(max_length=100)
-        phone = models.CharField(max_length=15)
-        amount = models.DecimalField(max_digits=10, decimal_places=2)
-        method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
-        paid_at = models.DateTimeField(auto_now_add=True)
+class PaymentMethod(models.Model):
+    PAYMENT_METHODS = [
+        ('kaspi', 'Kaspi'),
+        ('halyk', 'Halyk Bank'),
+        ('cash', 'Cash'),
+        ('stripe', 'Stripe'),
+    ]
 
-        def __str__(self):
-            return f"{self.full_name} | {self.get_method_display()} | {self.amount} ₸"
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
+    paid_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} | {self.get_method_display()} | {self.amount} ₸"
