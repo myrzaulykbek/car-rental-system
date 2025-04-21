@@ -1,30 +1,83 @@
+<!-- main/templates/client_home.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Список машин</title>
+    <title>Аренда авто | Главная</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
-<body>
-    <h1>Список доступных машин</h1>
-    <ul>
-        {% for car in cars %}
-            <li>
-                <div class="car-card">
-                    <h3>{{ car.brand }} {{ car.model }} ({{ car.year }})</h3>
-                    <p>Цена за день: {{ car.price_per_day }}₸</p>
-                    <p>Доступность: {{ car.is_available|yesno:"Да,Нет" }}</p>
+<body class="bg-gray-100 text-gray-900">
 
-                    {% if car.image %}
-                        <img src="{{ car.image.url }}" alt="{{ car.brand }}" width="300" height="200">
-                    {% else %}
-                        <p>Фото недоступно</p>
-                    {% endif %}
-                </div>
-            </li>
-        {% empty %}
-            <li>Машины не найдены</li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'add_car' %}">Добавить новую машину</a>
+    <!-- Хедер -->
+    <header class="bg-white shadow-md p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">🚗 RentAuto</h1>
+        <div>
+            <a href="/logout/" class="text-blue-500 hover:underline">Выйти</a>
+        </div>
+    </header>
+
+    <!-- Форма фильтра -->
+<section class="p-6 bg-white shadow mt-4 max-w-4xl mx-auto rounded-xl">
+    <form method="GET" class="flex flex-wrap gap-4 items-end">
+        <div>
+            <label class="block font-semibold">Класс авто</label>
+            <select name="category" class="border rounded p-2">
+                <option value="">Все</option>
+                <option value="standard" {% if category == 'standard' %}selected{% endif %}>Стандарт</option>
+                <option value="luxury" {% if category == 'luxury' %}selected{% endif %}>Люкс</option>
+                <option value="electric" {% if category == 'electric' %}selected{% endif %}>Электро</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block font-semibold">Дата от</label>
+            <input type="date" name="start_date" value="{{ start_date }}" class="border rounded p-2">
+        </div>
+
+        <div>
+            <label class="block font-semibold">Дата до</label>
+            <input type="date" name="end_date" value="{{ end_date }}" class="border rounded p-2">
+        </div>
+
+        <div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">🔍 Найти</button>
+        </div>
+    </form>
+</section>
+
+
+    <!-- Список машин -->
+    <section class="max-w-4xl mx-auto mt-6">
+        {% if cars %}
+            <div class="grid md:grid-cols-2 gap-6">
+                {% for car in cars %}
+                    <div class="bg-white shadow p-4 rounded-xl">
+                        <h2 class="text-xl font-bold mb-2">{{ car.brand }} {{ car.model }}</h2>
+                        {% if car.image %}
+                            <img src="{{ car.image.url }}" alt="{{ car.brand }}" class="w-full h-48 object-cover rounded">
+                        {% endif %}
+                        <p class="mt-2">💰 <strong>{{ car.price_per_day }} ₸</strong> в день</p>
+                        <p>🚘 Класс: {{ car.get_category_display }}</p>
+                        <p>
+                            {% if car.is_available %}
+                                ✅ Доступна
+                            {% else %}
+                                ❌ Недоступна
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'book_car' car.id %}" class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded">Забронировать</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-gray-500 mt-6">Нет доступных машин по заданным параметрам</p>
+        {% endif %}
+    </section>
+
+    <!-- Подвал -->
+    <footer class="text-center text-sm text-gray-500 mt-10 p-4">
+        &copy; {{ year }} RentAuto. Все права защищены.
+    </footer>
+
 </body>
 </html>

@@ -16,12 +16,71 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from .forms import CarForm
-
-
 from .models import Payment
 from .serializers import PaymentSerializer
+
+from .models import  Booking
+from datetime import datetime
+
+def car_list(request):
+    category = request.GET.get('category')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Все доступные машины
+    cars = Car.objects.filter(is_available=True)
+
+    # ✅ Фильтрация по категории
+    if category:
+        cars = cars.filter(category=category)
+
+    # ✅ Фильтрация по дате: исключить забронированные авто
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+            # Найти машины, у которых уже есть бронирования на эти даты
+            booked_car_ids = Booking.objects.filter(
+                start_date__lte=end,
+                end_date__gte=start
+            ).values_list('car_id', flat=True)
+
+            # Удалить их из результата
+            cars = cars.exclude(id__in=booked_car_ids)
+
+        except ValueError:
+            pass  # если даты неправильные — игнорируем
+
+    return render(request, 'car_list.html', {
+        'cars': cars,
+        'category': category,
+        'start_date': start_date,
+        'end_date': end_date
+    })
+
+def client_home(request):
+    category = request.GET.get('category')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    cars = Car.objects.filter(is_available=True)
+
+    if category:
+        cars = cars.filter(category=category)
+
+    # Фильтр по дате аренды — можно позже доработать
+
+    return render(request, 'client_home.html', {'cars': cars})
+
+
+
+
+
+
+
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
@@ -77,17 +136,26 @@ def add_car(request):
 from django.shortcuts import render
 from .models import Car
 
-def home_view(request):
-    cars = Car.objects.all()  # Получаем все автомобили
-    return render(request, 'main/home.html', {'cars': cars})
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'main/home.html')
+
 
 
 
 
 @login_required
+
 def car_list(request):
     cars = Car.objects.all()
     return render(request, 'main/car_list.html', {'cars': cars})
+
+
+
+
+
+
 
 @login_required
 def rent_car(request, car_id):
@@ -177,3 +245,18 @@ class UserProfileView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+from django.contrib.auth import login
+from .forms import CustomUserCreationForm
+
+def register_view(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # автоматический вход
+            return redirect('home')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'main/register.html', {'form': form})

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Rental</title>
+</head>
+<body>
+    <h1>Аренда автомобилей </h1>
+
+    <form method="GET">
+        <label>Выберите класс машины:</label>
+        <select name="category">
+            <option value="">Все</option>
+            <option value="standard">Стандарт</option>
+            <option value="luxury">Люкс</option>
+            <option value="electric">Электро</option>
+        </select>
+
+        <label>Дата от:</label>
+        <input type="date" name="start_date">
+
+        <label>Дата до:</label>
+        <input type="date" name="end_date">
+
+        <button type="submit">🔍 Найти</button>
+    </form>
+
+    <hr>
+
+    {% for car in cars %}
+        <div>
+            <h3>{{ car.brand }} {{ car.model }}</h3>
+            <p>Цена за день: {{ car.price_per_day }} ₸</p>
+            <p>Класс: {{ car.category }}</p>
+            <p>{% if car.is_available %} Доступна{% else %} Недоступна{% endif %}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>

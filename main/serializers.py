@@ -1,9 +1,7 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Car, Rental
+from .models import Car, Rental, Payment
 from django.contrib.auth.models import User
-from .models import  Payment
-
 
 class CarSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,8 +25,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
-
-
 
 
 class PaymentSerializer(serializers.ModelSerializer):

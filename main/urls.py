@@ -6,12 +6,20 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from . import views
 from django.contrib.auth import views as auth_views
 from django.urls import path
-from .views import home_view
+from .views import home_view, register_view
 
 from django.conf import settings
 from django.conf.urls.static import static
 
 from .views import CarViewSet, PaymentViewSet, home
+
+
+from .views import client_home
+
+urlpatterns = [
+    path('', client_home, name='client_home'),
+
+]
 
 
 
@@ -38,18 +46,17 @@ router.register(r'rentals', RentalViewSet)
 
 
 urlpatterns = [
+    path('register/', register_view, name='register'),
     path('book/<int:car_id>/', views.book_car, name='book_car'),
     path('', views.home_view, name='home'),  # Главная страница
     path('car_list/', views.car_list, name='car_list'),  # Список машин
-    path('register/', views.register, name='register'),
     path('', home_view, name='home'),
     path('cars/', views.car_list, name='car_list'),
     path('add_car/', views.add_car, name='add_car'),
-    path('login/', views.login_view, name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='main/login.html'), name='login'),
 
 
     path('', home, name='home'),
-    path('register/', register, name='register'),
     path('api/', include(router.urls)),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('client-dashboard/', views.client_dashboard, name='client_dashboard'),
@@ -83,4 +90,7 @@ urlpatterns += [
     path('reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='main/password_reset_complete.html'),
          name='password_reset_complete'),
+    path('', views.home, name='home'),
+    path('login/', auth_views.LoginView.as_view(template_name='main/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
 ]

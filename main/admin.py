@@ -12,6 +12,9 @@ admin.site.register(Rental)
 admin.site.register(Payment)
 
 
+from .models import Booking
+
+admin.site.register(Booking)
 
 
 
