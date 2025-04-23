@@ -7,7 +7,7 @@ from .models import  Rental
 from .serializers import CarSerializer, RentalSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CarFilter, RentalFilter
-from django.shortcuts import  redirect
+from django.shortcuts import  redirect , get_object_or_404
 from .decorators import admin_required, client_required
 from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
@@ -23,6 +23,9 @@ from .serializers import PaymentSerializer
 
 from .models import  Booking
 from datetime import datetime
+from django.db.models import Avg
+from .forms import ReviewForm
+
 
 def car_list(request):
     category = request.GET.get('category')
@@ -32,11 +35,14 @@ def car_list(request):
     # Все доступные машины
     cars = Car.objects.filter(is_available=True)
 
-    # ✅ Фильтрация по категории
+    # Аннотируем машины их средним рейтингом
+    cars = cars.annotate(reviews_avg=Avg('reviews__rating'))
+
+    # Обрабатываем фильтрацию
     if category:
         cars = cars.filter(category=category)
 
-    # ✅ Фильтрация по дате: исключить забронированные авто
+    # Фильтр по дате аренды
     if start_date and end_date:
         try:
             start = datetime.strptime(start_date, '%Y-%m-%d').date()
@@ -53,12 +59,25 @@ def car_list(request):
 
         except ValueError:
             pass  # если даты неправильные — игнорируем
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            car = get_object_or_404(Car, id=request.POST.get('car_id'))
+            review = form.save(commit=False)
+            review.car = car
+            review.save()
+            car.reviews_avg = car.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+            car.save()
+            return redirect('cars')  # Перенаправить на страницу с машинами
+    else:
+        form = ReviewForm()
 
     return render(request, 'car_list.html', {
         'cars': cars,
         'category': category,
         'start_date': start_date,
-        'end_date': end_date
+        'end_date': end_date,
+        'form' : form,
     })
 
 def client_home(request):

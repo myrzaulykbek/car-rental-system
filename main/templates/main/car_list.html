@@ -65,6 +65,31 @@
                                 ❌ Недоступна
                             {% endif %}
                         </p>
+                         <!-- ⭐ Рейтинг -->
+                        <p>⭐ Рейтинг: {{ car.reviews_avg|floatformat:1 }}/5 ({{ car.reviews_count }} отзывов)</p>
+        <!-- Форма отзыва -->
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="car_id" value="{{ car.id }}">
+
+            <div class="mt-4">
+                <label for="rating" class="block">Оценка (от 1 до 5)</label>
+                <select name="rating" id="rating" class="border rounded p-2">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+
+            <div class="mt-4">
+                <label for="text" class="block">Отзыв</label>
+                <textarea name="text" id="text" rows="4" class="border rounded p-2 w-full" placeholder="Напишите ваш отзыв..."></textarea>
+            </div>
+
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 mt-4 rounded">Оставить отзыв</button>
+        </form>
                         <a href="{% url 'book_car' car.id %}" class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded">Забронировать</a>
                     </div>
                 {% endfor %}

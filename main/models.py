@@ -21,6 +21,9 @@ class Car(models.Model):
     image = models.ImageField(upload_to='car_images/', blank=True, null=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='standard')
 
+    reviews_avg = models.DecimalField(max_digits=3, decimal_places=1, default=0)  # Средний рейтинг
+    reviews_count = models.PositiveIntegerField(default=0)  # Количество отзывов
+
     def __str__(self):
         return f"{self.brand} {self.model} ({self.year})"
 
@@ -126,3 +129,12 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.car} | {self.start_date} → {self.end_date} | {self.user.username}"
+class Review(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField()  # от 1 до 5
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.car} - {self.rating}★ от {self.user.username}"
