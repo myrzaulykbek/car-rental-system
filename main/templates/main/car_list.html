@@ -12,7 +12,10 @@
     <header class="bg-white shadow-md p-4 flex justify-between items-center">
         <h1 class="text-2xl font-bold">🚗 RentAuto</h1>
         <div>
-            <a href="/logout/" class="text-blue-500 hover:underline">Выйти</a>
+            <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="text-blue-500 hover:underline">Выйти</button>
+        </form>
         </div>
     </header>
 
