@@ -87,13 +87,13 @@
             </div>
 
             <div class="mt-4">
-                <label for="text" class="block">Отзыв</label>
-                <textarea name="text" id="text" rows="4" class="border rounded p-2 w-full" placeholder="Напишите ваш отзыв..."></textarea>
+                <label for="comment" class="block">Отзыв</label>
+                <textarea name="comment" id="comment" rows="4" class="border rounded p-2 w-full" placeholder="Напишите ваш отзыв..."></textarea>
             </div>
 
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 mt-4 rounded">Оставить отзыв</button>
         </form>
-                        <a href="{% url 'book_car' car.id %}" class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded">Забронировать</a>
+                        <a href="{% url 'booking' car.id %}" class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded">Забронировать</a>
                     </div>
                 {% endfor %}
             </div>

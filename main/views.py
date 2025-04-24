@@ -27,6 +27,13 @@ from django.db.models import Avg
 from .forms import ReviewForm
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from datetime import datetime
+from django.db.models import Avg
+from .models import Car, Booking
+from .forms import ReviewForm
+
+
 def car_list(request):
     category = request.GET.get('category')
     start_date = request.GET.get('start_date')
@@ -35,10 +42,10 @@ def car_list(request):
     # Все доступные машины
     cars = Car.objects.filter(is_available=True)
 
-    # Аннотируем машины их средним рейтингом
-    cars = cars.annotate(reviews_avg=Avg('reviews__rating'))
+    # Аннотируем машины их средним рейтингом (название поля не должно конфликтовать с model field)
+    cars = cars.annotate(avg_rating=Avg('reviews__rating'))
 
-    # Обрабатываем фильтрацию
+    # Фильтр по категории
     if category:
         cars = cars.filter(category=category)
 
@@ -48,36 +55,44 @@ def car_list(request):
             start = datetime.strptime(start_date, '%Y-%m-%d').date()
             end = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-            # Найти машины, у которых уже есть бронирования на эти даты
+            # Найти машины, которые уже забронированы на эти даты
             booked_car_ids = Booking.objects.filter(
                 start_date__lte=end,
                 end_date__gte=start
             ).values_list('car_id', flat=True)
 
-            # Удалить их из результата
+            # Исключить их из результатов
             cars = cars.exclude(id__in=booked_car_ids)
 
         except ValueError:
-            pass  # если даты неправильные — игнорируем
+            pass  # некорректные даты — игнорируем
+
+    # Обработка отзыва
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
             car = get_object_or_404(Car, id=request.POST.get('car_id'))
             review = form.save(commit=False)
             review.car = car
+            review.user = request.user
             review.save()
-            car.reviews_avg = car.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+
+            # Обновляем агрегаты
+            car.reviews_count = car.reviews.count()
+            car.reviews_avg = car.reviews.aggregate(avg=Avg('rating'))['avg'] or 0
             car.save()
-            return redirect('cars')  # Перенаправить на страницу с машинами
+
+
+            return redirect('cars')
     else:
         form = ReviewForm()
 
-    return render(request, 'car_list.html', {
+    return render(request, 'main/car_list.html', {
         'cars': cars,
         'category': category,
         'start_date': start_date,
         'end_date': end_date,
-        'form' : form,
+        'form': form,
     })
 
 def client_home(request):
@@ -160,15 +175,6 @@ from django.shortcuts import render
 def home(request):
     return render(request, 'main/home.html')
 
-
-
-
-
-@login_required
-
-def car_list(request):
-    cars = Car.objects.all()
-    return render(request, 'main/car_list.html', {'cars': cars})
 
 
 
@@ -274,8 +280,44 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # автоматический вход
+            login(request, user)
             return redirect('home')
     else:
         form = CustomUserCreationForm()
     return render(request, 'main/register.html', {'form': form})
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Car, Booking
+from .forms import BookingForm
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def booking_view(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
+
+    if not car.is_available:
+        return render(request, 'main/booking_unavailable.html', {'car': car})
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.user = request.user
+            booking.car = car
+            booking.save()
+
+            car.is_available = False
+            car.save()
+            return redirect('booking_success')
+
+
+    else:
+        form = BookingForm()
+
+    return render(request, 'main/booking_form.html', {'form': form, 'car': car})
+
+
+def booking_success(request):
+    return render(request, 'main/booking_success.html')

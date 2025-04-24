@@ -12,9 +12,10 @@ admin.site.register(Rental)
 admin.site.register(Payment)
 
 
-from .models import Booking
+from .models import Booking, Review
 
 admin.site.register(Booking)
 
+admin.site.register(Review)
 
 

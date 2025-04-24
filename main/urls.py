@@ -13,7 +13,6 @@ from django.conf.urls.static import static
 
 from .views import CarViewSet, PaymentViewSet, home
 
-
 from .views import client_home
 
 urlpatterns = [
@@ -25,14 +24,14 @@ urlpatterns = [
 
 router = DefaultRouter()
 router.register(r'cars', CarViewSet)
-router.register(r'payments', PaymentViewSet)  # добавили платежи
+router.register(r'payments', PaymentViewSet)
 
 
 
 
 router = DefaultRouter()
 router.register(r'cars', CarViewSet)
-router.register(r'payments', PaymentViewSet)  # добавили платежи
+router.register(r'payments', PaymentViewSet)
 
 
 
@@ -93,4 +92,7 @@ urlpatterns += [
     path('', views.home, name='home'),
     path('login/', auth_views.LoginView.as_view(template_name='main/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
+    path('booking/<int:car_id>/', views.booking_view, name='booking'),
+    path('booking/success/', views.booking_success, name='booking_success'),
+    path('cars/', views.car_list, name='cars'),
 ]

@@ -26,3 +26,16 @@ from django.contrib.auth.forms import AuthenticationForm
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
+
+
+from django import forms
+from .models import Booking
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['start_date', 'end_date']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'border rounded p-2'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'border rounded p-2'}),
+        }
