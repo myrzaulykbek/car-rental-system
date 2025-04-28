@@ -34,40 +34,37 @@ from .models import Car, Booking
 from .forms import ReviewForm
 
 
+@login_required
 def car_list(request):
     category = request.GET.get('category')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Все доступные машины
-    cars = Car.objects.filter(is_available=True)
+    # Базовый запрос: доступные машины
+    cars = Car.objects.filter(is_available=True).prefetch_related('reviews')
+    for car in cars:
+        for review in car.reviews.all():
+            review.stars_full = [1] * review.rating  # Полные звезды
+            review.stars_empty = [1] * (5 - review.rating)  # Пустые звезды
 
-    # Аннотируем машины их средним рейтингом (название поля не должно конфликтовать с model field)
-    cars = cars.annotate(avg_rating=Avg('reviews__rating'))
-
-    # Фильтр по категории
+    # Фильтрация по категории
     if category:
         cars = cars.filter(category=category)
 
-    # Фильтр по дате аренды
+    # Фильтрация по датам аренды
     if start_date and end_date:
         try:
             start = datetime.strptime(start_date, '%Y-%m-%d').date()
             end = datetime.strptime(end_date, '%Y-%m-%d').date()
-
-            # Найти машины, которые уже забронированы на эти даты
             booked_car_ids = Booking.objects.filter(
                 start_date__lte=end,
                 end_date__gte=start
             ).values_list('car_id', flat=True)
-
-            # Исключить их из результатов
             cars = cars.exclude(id__in=booked_car_ids)
-
         except ValueError:
-            pass  # некорректные даты — игнорируем
+            pass  # если неправильная дата, игнорируем
 
-    # Обработка отзыва
+    # Обработка формы отзыва
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
@@ -77,23 +74,24 @@ def car_list(request):
             review.user = request.user
             review.save()
 
-            # Обновляем агрегаты
+            # Пересчитываем рейтинг и количество отзывов
             car.reviews_count = car.reviews.count()
             car.reviews_avg = car.reviews.aggregate(avg=Avg('rating'))['avg'] or 0
             car.save()
 
-
-            return redirect('cars')
+            return redirect('car_list')
     else:
         form = ReviewForm()
 
-    return render(request, 'main/car_list.html', {
+    context = {
         'cars': cars,
         'category': category,
         'start_date': start_date,
         'end_date': end_date,
         'form': form,
-    })
+        'year': datetime.now().year,
+    }
+    return render(request, 'main/car_list.html', context)
 
 def client_home(request):
     category = request.GET.get('category')
